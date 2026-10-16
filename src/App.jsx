@@ -81,6 +81,7 @@ function App() {
               setRecentSearch={setRecentSearch}
               unit={unit}
               setUnit={setUnit}
+              onWeatherUpdate={setCachedWeather}
             />
           }
         />

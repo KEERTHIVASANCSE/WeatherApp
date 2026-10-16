@@ -16,7 +16,8 @@ import {
   Layers,
   Thermometer,
   CloudRain,
-  Wind
+  Wind,
+  MapPin
 } from 'lucide-react'
 import { processAIChat, I18N } from '../services/aiChatbot'
 import { formatTemp } from '../services/weatherApi'
@@ -28,6 +29,23 @@ export default function AIChatbot({ currentWeather, unit = 'C', onSelectCity }) 
   const [isTyping, setIsTyping] = useState(false)
   const [isListening, setIsListening] = useState(false)
   const [ttsEnabled, setTtsEnabled] = useState(false)
+
+  const activeCityName = currentWeather?.city?.name
+  const activeTempStr = currentWeather?.list?.[0] ? formatTemp(currentWeather.list[0].main.temp, unit) : ''
+
+  // Generate dynamic location-based suggestions
+  const getLocationSuggestions = (cityName) => {
+    if (!cityName) return (I18N[language] || I18N.en).suggestions
+    return [
+      `☂️ Umbrella in ${cityName}?`,
+      `👕 What to wear in ${cityName}?`,
+      `🏃 Workout in ${cityName}?`,
+      `🍃 Air quality in ${cityName}`,
+      `📅 7-day forecast for ${cityName}`,
+      `⚡ Alerts in ${cityName}`,
+      `✈️ Travel advice for ${cityName}`
+    ]
+  }
 
   const [messages, setMessages] = useState([
     {
@@ -41,6 +59,38 @@ export default function AIChatbot({ currentWeather, unit = 'C', onSelectCity }) 
 
   const messagesEndRef = useRef(null)
   const recognitionRef = useRef(null)
+  const lastCityRef = useRef(null)
+
+  // React to searched location changes dynamically
+  useEffect(() => {
+    if (!currentWeather || !currentWeather.city || !currentWeather.list?.[0]) return
+    const cityName = currentWeather.city.name
+
+    // If city changed or first load of search location
+    if (lastCityRef.current !== cityName) {
+      lastCityRef.current = cityName
+      const cur = currentWeather.list[0]
+      const tempStr = formatTemp(cur.main.temp, unit)
+      const feelsStr = formatTemp(cur.main.feels_like, unit)
+      const desc = cur.weather[0].description
+      const isRainy = currentWeather.recommendations?.umbrella?.needed
+      const rainProb = cur.rainProbability ?? 0
+
+      const proactiveMsg = {
+        id: Date.now(),
+        sender: 'bot',
+        text: `📍 **Live telemetry synchronized for ${cityName}!**\n\nCurrently **${tempStr}** (feels like **${feelsStr}**) with **${desc}**.\n${
+          isRainy
+            ? `☔ **Umbrella advised**: Rain chance is around ${rainProb}%.`
+            : `☀️ **Clear skies**: No umbrella required right now.`
+        }\n\nAsk me about clothing, running conditions, air quality, or weekend forecasts for **${cityName}**!`,
+        cards: [currentWeather],
+        followUps: getLocationSuggestions(cityName)
+      }
+
+      setMessages((prev) => [...prev, proactiveMsg])
+    }
+  }, [currentWeather?.city?.name, unit])
 
   // Scroll to latest message
   useEffect(() => {
@@ -60,7 +110,7 @@ export default function AIChatbot({ currentWeather, unit = 'C', onSelectCity }) 
         sender: 'bot',
         text: langObj.greeting,
         cards: [],
-        followUps: langObj.suggestions
+        followUps: getLocationSuggestions(activeCityName)
       }
     ])
   }
@@ -68,12 +118,11 @@ export default function AIChatbot({ currentWeather, unit = 'C', onSelectCity }) 
   // Text to Speech
   const speakText = (text) => {
     if (!ttsEnabled || !window.speechSynthesis) return
-    window.speechSynthesis.cancel() // stop previous
+    window.speechSynthesis.cancel()
     const cleanText = text.replace(/[*_#•]/g, '')
     const utterance = new SpeechSynthesisUtterance(cleanText)
     utterance.rate = 1.05
     utterance.pitch = 1.0
-    // Try to match language
     if (language === 'es') utterance.lang = 'es-ES'
     else if (language === 'fr') utterance.lang = 'fr-FR'
     else if (language === 'de') utterance.lang = 'de-DE'
@@ -155,7 +204,7 @@ export default function AIChatbot({ currentWeather, unit = 'C', onSelectCity }) 
         sender: 'bot',
         text: response.text,
         cards: response.cards || [],
-        followUps: response.followUps || []
+        followUps: response.followUps || getLocationSuggestions(activeCityName)
       }
 
       setMessages((prev) => [...prev, botMsg])
@@ -168,7 +217,7 @@ export default function AIChatbot({ currentWeather, unit = 'C', onSelectCity }) 
           sender: 'bot',
           text: "I encountered a minor atmospheric interference. Please check your query or internet connection.",
           cards: [],
-          followUps: ['Weather in London', 'Weather in Chennai']
+          followUps: getLocationSuggestions(activeCityName)
         }
       ])
     } finally {
@@ -191,9 +240,16 @@ export default function AIChatbot({ currentWeather, unit = 'C', onSelectCity }) 
               <span className="relative inline-flex rounded-full h-3 w-3 bg-white"></span>
             </span>
             <Bot size={22} className="text-gray-950" />
-            <span className="hidden sm:inline font-bold tracking-wide text-sm pr-1 text-gray-950">
-              ZenAI Weather Copilot
-            </span>
+            <div className="hidden sm:flex flex-col text-left pr-1 leading-tight">
+              <span className="font-bold tracking-wide text-xs text-gray-950">
+                ZenAI Weather Copilot
+              </span>
+              {activeCityName && (
+                <span className="text-[10px] text-cyan-950 font-semibold flex items-center gap-0.5">
+                  <MapPin size={9} /> {activeCityName} ({activeTempStr})
+                </span>
+              )}
+            </div>
           </button>
         )}
 
@@ -208,11 +264,19 @@ export default function AIChatbot({ currentWeather, unit = 'C', onSelectCity }) 
                 </div>
                 <div>
                   <div className="flex items-center gap-1.5">
-                    <span className="text-white font-bold text-sm tracking-wide">ZenAI Intelligence</span>
+                    <span className="text-white font-bold text-sm tracking-wide">
+                      ZenAI Intelligence
+                    </span>
                     <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
                   </div>
-                  <span className="text-cyan-300 text-[11px] font-medium opacity-90">
-                    Live Open-Meteo Copilot
+                  <span className="text-cyan-300 text-[11px] font-medium opacity-90 flex items-center gap-1">
+                    {activeCityName ? (
+                      <>
+                        <MapPin size={10} /> Active: {activeCityName} ({activeTempStr})
+                      </>
+                    ) : (
+                      'Live Open-Meteo Copilot'
+                    )}
                   </span>
                 </div>
               </div>
@@ -250,7 +314,7 @@ export default function AIChatbot({ currentWeather, unit = 'C', onSelectCity }) 
                 {/* Close Button */}
                 <button
                   onClick={() => setIsOpen(false)}
-                  className="p-1.5 rounded-lg hover:bg-white/10 text-white/70 hover:text-white transition-colors ml-1"
+                  className="p-1.5 rounded-lg hover:bg-white/10 text-white/70 hover:text-white transition-colors ml-1 cursor-pointer"
                   title="Close ZenAI"
                 >
                   <X size={18} />
@@ -339,9 +403,9 @@ export default function AIChatbot({ currentWeather, unit = 'C', onSelectCity }) 
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Quick Suggestions Bar */}
+            {/* Location-Aware Quick Suggestions Bar */}
             <div className="px-3 py-1.5 bg-black/40 border-t border-white/10 flex gap-2 overflow-x-auto no-scrollbar">
-              {(I18N[language] || I18N.en).suggestions.map((sug, idx) => (
+              {getLocationSuggestions(activeCityName).map((sug, idx) => (
                 <button
                   key={idx}
                   onClick={() => handleSend(sug)}
@@ -356,7 +420,13 @@ export default function AIChatbot({ currentWeather, unit = 'C', onSelectCity }) 
             <div className="p-3 bg-white/5 border-t border-white/10 flex items-center gap-2">
               <input
                 type="text"
-                placeholder={isListening ? 'Listening to voice...' : 'Ask ZenAI anything about the weather...'}
+                placeholder={
+                  isListening
+                    ? 'Listening to voice...'
+                    : activeCityName
+                    ? `Ask ZenAI about ${activeCityName} or any city...`
+                    : 'Ask ZenAI anything about the weather...'
+                }
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => {

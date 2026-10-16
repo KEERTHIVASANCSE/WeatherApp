@@ -26,7 +26,8 @@ export default function DashBoard({
   recentSearch = [],
   setRecentSearch,
   unit = 'C',
-  setUnit
+  setUnit,
+  onWeatherUpdate
 }) {
   const [search, setSearch] = useState("")
   const [loading, setLoading] = useState(false)
@@ -133,6 +134,9 @@ export default function DashBoard({
         if (!isCurrent) return
 
         setData(weatherData)
+        if (onWeatherUpdate) {
+          onWeatherUpdate(weatherData)
+        }
         setRecentSearch((prev = []) => {
           const filtered = prev.filter((c) => c.toLowerCase() !== weatherData.city.name.toLowerCase())
           const updated = [weatherData.city.name, ...filtered].slice(0, 10)
