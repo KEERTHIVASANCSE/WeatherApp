@@ -7,7 +7,7 @@ export default function NavBar(){
             <div className="flex items-center gap-2">
                    <h3 className="text-lg font-bold bg-gradient-to-r from-pink-300 via-orange-300 to-yellow-200 bg-clip-text text-transparent tracking-widest md:text-3xl"
                  
-                style={{ fontFamily: "Michroma" }}>CLIMORA</h3>
+                style={{ fontFamily: "Michroma" }}>Skyzen</h3>
                    </div>
                     <ul className="flex flex-wrap gap-6 mt-2 md:gap-6 text-white "> 
 
