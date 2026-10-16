@@ -2,46 +2,37 @@
 
 Experience the weather like never before! 🌦️
 
-Cloudix is a modern weather application featuring real-time weather updates, beautiful animated interfaces, and cinematic video backgrounds that change with the weather.
+Skyzen is a modern weather application featuring real-time weather updates, beautiful animated interfaces, and cinematic video backgrounds that change with the weather.
 
 ## ✨ Features
 
-- 🌤️ Real-time weather updates
-- 🎬 Dynamic rain, snow, sunny, and storm video backgrounds
-- 🔍 Search weather by city
-- 📅 5-day weather forecast
-- 📊 Interactive weather charts
-- ❤️ Favorite cities
+- 🌤️ Real-time weather updates powered by Open-Meteo
+- 🎬 Dynamic rain, cloud, sunny, and haze video backgrounds
+- 🔍 Instant dynamic search by city (e.g. Chennai, London, Tokyo, New York)
+- 📅 5-day weather forecast trajectory
 - 🕒 Recent search history
 - 📱 Fully responsive design
 - 🎨 Modern glassmorphism UI
+- 🚀 Zero API keys or environment variables required!
 
 ## 🛠️ Tech Stack
 
-- React.js
+- React.js 19
 - Tailwind CSS
-- React Router
-- OpenWeatherMap API
+- React Router v7
+- Open-Meteo Geocoding & Forecast APIs (Free, non-commercial, no API key needed)
+- Lucide React & React Icons
 - Vite
-- Vercel
 
 ## 🚀 Getting Started
 
 Clone the repository:
 
 ```bash
-git clone YOUR_GITHUB_REPOSITORY_URL
-cd cloudix
+git clone https://github.com/KEERTHIVASANCSE/WeatherApp.git
+cd WeatherApp
 npm install
 ```
-
-Create a `.env` file in the root directory:
-
-```env
-VITE_WEATHER_API_KEY=your_api_key
-```
-
-Get your API key from [OpenWeatherMap](https://openweathermap.org/api).
 
 Start the development server:
 
@@ -49,9 +40,15 @@ Start the development server:
 npm run dev
 ```
 
+Build for production:
+
+```bash
+npm run build
+```
+
 ## 🌐 Live Demo
 
-Add your deployed website link here.
+- Live website: [https://weatherskyzen.netlify.app/home](https://weatherskyzen.netlify.app/home)
 
 ## 👨‍💻 Author
 
