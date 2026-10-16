@@ -24,8 +24,8 @@ export default function AboutUs(){
                 <div className="flex justify-center items-center gap-8 md:gap-12 px-16 ">
                 <p className="text-white text-sm ">© 2026 Skyzen  </p>
                 <p className="text-white text-sm ">Built by KEERTHIVASAN V</p>
-                    <a className="text-white text-sm flex justify-center itmes-center gap-2" href="https://github.com/muskanm07" target="_blank"><FaGithub className="h-5 w-5 text-white-500" />GitHub</a>
-                     <a className="text-white text-sm flex justify-center itmes-center gap-2" href="https://www.linkedin.com/in/muskan-maurya-1344202b2/" target="_blank"><FaLinkedin className="h-5 w-5 text-white-500" />LinkedIn</a>
+                    <a className="text-white text-sm flex justify-center itmes-center gap-2" href="https://github.com/KEERTHIVASANCSE" target="_blank"><FaGithub className="h-5 w-5 text-white-500" />GitHub</a>
+                     <a className="text-white text-sm flex justify-center itmes-center gap-2" href="https://www.linkedin.com/in/vasan2006/" target="_blank"><FaLinkedin className="h-5 w-5 text-white-500" />LinkedIn</a>
     
      </div>
      </footer>
